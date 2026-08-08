@@ -1,0 +1,39 @@
+
+# Ingress for agent_eta
+# Configure your domain and TLS settings before deploying
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: agent_eta-ingress
+  namespace: agent_eta
+  labels:
+    app.kubernetes.io/name: agent_eta
+    app.kubernetes.io/component: ingress
+  annotations:
+    # Nginx Ingress Controller annotations
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    # Rate limiting (adjust as needed)
+    nginx.ingress.kubernetes.io/limit-rps: "100"
+    nginx.ingress.kubernetes.io/limit-connections: "50"
+    # Uncomment for Let's Encrypt with cert-manager
+    # cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  # Uncomment for TLS
+  # tls:
+  #   - hosts:
+  #       - api.example.com
+  #     secretName: agent_eta-tls
+  rules:
+    - host: api.example.com  # Replace with your domain
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: agent_eta-backend
+                port:
+                  number: 8500

@@ -1,0 +1,9 @@
+
+# Kubernetes Namespace for agent_eta
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: agent_eta
+  labels:
+    app.kubernetes.io/name: agent_eta
+    app.kubernetes.io/managed-by: kubectl
