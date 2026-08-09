@@ -48,7 +48,7 @@ dependencies = [
     # pydantic-ai backend with console toolset (StateBackend, LocalBackend)
     "pydantic-ai-backend[console]>=0.2.4",
     # pydantic-ai with web search and fetch support (WebSearch, WebFetch capabilities)
-    "pydantic-ai-slim[duckduckgo,web-fetch]>=1.80.0",
+    "pydantic-ai-slim[duckduckgo,web-fetch,openai]>=1.80.0",
     # Vector store
     "pymilvus>=2.6.0",
     # Text splitting
@@ -75,6 +75,7 @@ dependencies = [
     "cryptography>=44.0.0",
     "aiogram>=3.17,<4.0",
     "slack-sdk>=3.35.0",
+    "openai>=2.53.0",
 ]
 
 # PEP 735 dependency group — installed by `uv sync` / `uv sync --dev` and

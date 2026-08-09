@@ -47,10 +47,13 @@ COPY --from=builder /app /app
 # Add venv to path
 ENV PATH="/app/.venv/bin:$PATH"
 
-# Create non-root user and writable directories
+# Create non-root user and writable directories.
+# Only the runtime-writable dirs are chowned to appuser — the venv and code
+# are read-only at runtime. (chown-ing the entire /app recurses through the
+# multi-GB venv and makes builds crawl.)
 RUN adduser --disabled-password --gecos "" appuser && \
     mkdir -p /app/media /app/data /app/chroma_data /app/models_cache && \
-    chown -R appuser:appuser /app
+    chown -R appuser:appuser /app/media /app/data /app/chroma_data /app/models_cache
 USER appuser
 
 EXPOSE 8500
