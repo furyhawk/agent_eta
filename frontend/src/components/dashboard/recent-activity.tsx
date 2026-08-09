@@ -6,7 +6,7 @@ import { Coins, MessageSquare, Receipt, Sparkles } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import { EmptyState, ErrorState, LoadingState } from "@/components/states";
-import { apiClient } from "@/lib/api-client";
+import { apiClient, ApiError } from "@/lib/api-client";
 import { ROUTES } from "@/lib/constants";
 import { cn, getErrorMessage, timeAgo } from "@/lib/utils";
 
@@ -45,7 +45,17 @@ export function RecentActivity({ limit = 6 }: { limit?: number }) {
     try {
       const [convResp, txResp] = await Promise.allSettled([
         apiClient.get<{ items: ConversationItem[] }>("/conversations?limit=5"),
-        apiClient.get<{ items: CreditTx[] }>("/billing/me/credits/transactions?limit=5"),
+        // Credit transactions are optional — billing may be disabled in this
+        // deployment (no billing routes exist). Treat a 404 as "no
+        // transactions" instead of surfacing a failed request.
+        apiClient
+          .get<{ items: CreditTx[] }>("/billing/me/credits/transactions?limit=5")
+          .catch((err) => {
+            if (err instanceof ApiError && err.status === 404) {
+              return { items: [] as CreditTx[] };
+            }
+            throw err;
+          }),
       ]);
 
       const events: ActivityItem[] = [];
