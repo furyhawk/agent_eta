@@ -187,7 +187,8 @@ services:
     container_name: agent_eta_celery_beat
     volumes:
       - ./backend/app:/app/app:ro
-    command: celery -A app.worker.celery_app beat --loglevel=debug
+      - beat_data:/app/data
+    command: celery -A app.worker.celery_app beat --schedule=/app/data/celerybeat-schedule --loglevel=debug
     env_file:
       - ./backend/.env
     environment:
@@ -238,3 +239,4 @@ volumes:
   etcd_data:
   minio_data:
   milvus_data:
+  beat_data:
