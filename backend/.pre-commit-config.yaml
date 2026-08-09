@@ -5,7 +5,9 @@ repos:
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
+      # Kubernetes manifests in kubernetes/*.yaml are intentionally multi-doc.
       - id: check-yaml
+        args: [--multi]
       - id: check-toml
       - id: check-added-large-files
         args: ['--maxkb=1000']
@@ -20,6 +22,10 @@ repos:
       - id: ruff-format
 
   - repo: https://github.com/astral-sh/ty-pre-commit
-    rev: v0.0.29
+    rev: v0.0.69
     hooks:
+      # The hook entry is `uv check ...`. Point it at the backend project so
+      # ty resolves imports against backend/.venv instead of the repo root
+      # (the pre-commit config lives in backend/, but hooks run from the git root).
       - id: ty
+        args: [--project, backend, --locked]

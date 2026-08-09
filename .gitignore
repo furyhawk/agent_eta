@@ -108,3 +108,5 @@ Thumbs.db
 .fastapi-fullstack.json.candidate
 
 # Project specific
+backend/media/
+backend/models_cache/
