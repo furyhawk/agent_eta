@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { clearAuthCookies, setAuthCookies } from "@/lib/auth-cookies";
 import { backendFetch, BackendApiError } from "@/lib/server-api";
+import { refreshSession } from "@/lib/server-refresh";
 import type { User } from "@/types";
 
 function fetchMe(token: string) {
@@ -38,15 +39,16 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const refreshed = await backendFetch<{ access_token: string; refresh_token?: string }>(
-      "/api/v1/auth/refresh",
-      { method: "POST", body: JSON.stringify({ refresh_token: refreshToken }) },
-    );
-    const data = await fetchMe(refreshed.access_token);
-    const response = NextResponse.json({ ...data, access_token: refreshed.access_token });
+    const refreshed = await refreshSession(request);
+    if (!refreshed.ok) {
+      // Refresh failed → truly logged out. Clear cookies.
+      throw new Error("refresh_failed");
+    }
+    const data = await fetchMe(refreshed.accessToken);
+    const response = NextResponse.json({ ...data, access_token: refreshed.accessToken });
     setAuthCookies(response, {
-      accessToken: refreshed.access_token,
-      refreshToken: refreshed.refresh_token,
+      accessToken: refreshed.accessToken,
+      refreshToken: refreshed.refreshToken,
     });
     return response;
   } catch {

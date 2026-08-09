@@ -72,15 +72,29 @@ class SessionService:
     async def get_user_sessions(self, user_id: UUID) -> list[Session]:
         return await session_repo.get_user_sessions(self.db, user_id, active_only=True)
 
-    async def validate_refresh_token(self, refresh_token: str) -> Session | None:
+    async def rotate_refresh_token(self, refresh_token: str) -> Session | None:
+        """Atomically claim + validate a refresh token for rotation.
+
+        Returns the claimed session on success, ``None`` when the token is
+        unknown, inactive, expired, or was already rotated by a concurrent
+        request. Only one caller can claim a given token — this is what makes
+        the refresh endpoint safe under bursts of parallel 401s (previously
+        they all rotated, duplicating active rows and 500ing on the next
+        lookup).
+        """
         token_hash = _hash_token(refresh_token)
         session = await session_repo.get_by_refresh_token_hash(self.db, token_hash)
-
-        if session and session.expires_at > datetime.now(UTC):
-            await session_repo.update_last_used(self.db, session.id)
-            return session
-
-        return None
+        if session is None:
+            return None
+        if session.expires_at <= datetime.now(UTC):
+            # Expired — clean up the stale row and reject.
+            await session_repo.deactivate(self.db, session.id)
+            return None
+        claimed = await session_repo.deactivate_by_refresh_token_hash(self.db, token_hash)
+        if claimed is None:
+            # A concurrent request rotated this token first.
+            return None
+        return claimed
 
     async def logout_session(self, session_id: UUID, user_id: UUID) -> Session:
         session = await session_repo.get_by_id(self.db, session_id)

@@ -3,7 +3,7 @@
 import uuid
 from datetime import UTC, datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text
+from sqlalchemy import Boolean, DateTime, ForeignKey, Index, String, Text, text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -14,6 +14,19 @@ class Session(Base):
     """User session model for tracking active login sessions."""
 
     __tablename__ = "sessions"
+    __table_args__ = (
+        # A refresh token is single-use: only one active session may hold a
+        # given hash. Without this, concurrent refreshes using the same token
+        # (a burst of parallel 401s → parallel /auth/refresh) all rotate the
+        # token in the same second and insert duplicate active rows, which
+        # makes the next lookup raise MultipleResultsFound → HTTP 500.
+        Index(
+            "uq_sessions_active_refresh_token_hash",
+            "refresh_token_hash",
+            unique=True,
+            postgresql_where=text("is_active"),
+        ),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id: Mapped[uuid.UUID] = mapped_column(

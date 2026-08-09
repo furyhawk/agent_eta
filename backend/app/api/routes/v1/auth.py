@@ -76,7 +76,7 @@ async def refresh_token(
 ) -> Any:
     """Exchange a refresh token for a new access token."""
 
-    session = await session_service.validate_refresh_token(body.refresh_token)
+    session = await session_service.rotate_refresh_token(body.refresh_token)
     if not session:
         raise AuthenticationError(message="Invalid or expired refresh token")
 
@@ -87,7 +87,6 @@ async def refresh_token(
     access_token = create_access_token(subject=str(user.id))
     new_refresh_token = create_refresh_token(subject=str(user.id))
 
-    await session_service.logout_by_refresh_token(body.refresh_token)
     await session_service.create_session(
         user_id=user.id,
         refresh_token=new_refresh_token,

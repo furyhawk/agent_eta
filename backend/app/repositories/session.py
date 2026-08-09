@@ -1,6 +1,6 @@
 """Session repository (PostgreSQL async)."""
 
-from datetime import UTC, datetime
+from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import select, update
@@ -67,14 +67,6 @@ async def create(
     return session
 
 
-async def update_last_used(db: AsyncSession, session_id: UUID) -> None:
-    """Update session last used timestamp."""
-    await db.execute(
-        update(Session).where(Session.id == session_id).values(last_used_at=datetime.now(UTC))
-    )
-    await db.flush()
-
-
 async def deactivate(db: AsyncSession, session_id: UUID) -> Session | None:
     """Deactivate a session (logout)."""
     session = await get_by_id(db, session_id)
@@ -97,10 +89,23 @@ async def deactivate_all_user_sessions(db: AsyncSession, user_id: UUID) -> int:
 
 
 async def deactivate_by_refresh_token_hash(db: AsyncSession, token_hash: str) -> Session | None:
-    """Deactivate session by refresh token hash."""
-    session = await get_by_refresh_token_hash(db, token_hash)
-    if session:
-        session.is_active = False
-        db.add(session)
-        await db.flush()
-    return session
+    """Atomically deactivate a session by refresh token hash (claim).
+
+    The ``UPDATE ... WHERE is_active`` acquires the row lock, so only the first
+    concurrent caller claims the token; callers racing with the same
+    (already-rotated) token get ``None``. Returns the claimed session, or
+    ``None`` when no active session holds the hash.
+    """
+    result = await db.execute(
+        update(Session)
+        .where(
+            Session.refresh_token_hash == token_hash,
+            Session.is_active.is_(True),
+        )
+        .values(is_active=False)
+        .returning(Session.id)
+    )
+    row = result.first()
+    if row is None:
+        return None
+    return await get_by_id(db, row[0])

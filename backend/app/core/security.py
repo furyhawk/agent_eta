@@ -1,6 +1,7 @@
 """Security utilities for JWT authentication."""
 
 import hashlib
+import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -28,13 +29,25 @@ def create_refresh_token(
     subject: str | Any,
     expires_delta: timedelta | None = None,
 ) -> str:
-    """Create a JWT refresh token."""
+    """Create a JWT refresh token.
+
+    A random ``jti`` is embedded so two tokens minted within the same second
+    for the same subject are never byte-identical. Without it, concurrent
+    refreshes (or same-second logins) produced the exact same JWT, hence the
+    same stored ``refresh_token_hash`` — the root of the duplicate-session
+    corruption that made refresh fail with ``MultipleResultsFound`` → 500.
+    """
     if expires_delta:
         expire = datetime.now(UTC) + expires_delta
     else:
         expire = datetime.now(UTC) + timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES)
 
-    to_encode = {"exp": expire, "sub": str(subject), "type": "refresh"}
+    to_encode = {
+        "exp": expire,
+        "sub": str(subject),
+        "type": "refresh",
+        "jti": uuid.uuid4().hex,
+    }
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
