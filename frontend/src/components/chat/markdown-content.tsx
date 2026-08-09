@@ -32,4 +32,3 @@ const MarkdownContentImpl = dynamic(
 export function MarkdownContent({ content, onCiteClick }: MarkdownContentProps) {
   return <MarkdownContentImpl content={content} onCiteClick={onCiteClick} />;
 }
-

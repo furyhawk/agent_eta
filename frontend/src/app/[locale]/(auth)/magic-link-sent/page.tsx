@@ -77,4 +77,3 @@ export default async function MagicLinkSentPage({ searchParams }: PageProps) {
     </div>
   );
 }
-

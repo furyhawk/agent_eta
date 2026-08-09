@@ -177,4 +177,3 @@ export function PricingTeaser({ plans, fullPricingHref = "/pricing" }: PricingTe
     </div>
   );
 }
-

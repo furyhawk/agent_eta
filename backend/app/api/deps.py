@@ -120,9 +120,11 @@ SyncSourceSvc = Annotated[SyncSourceService, Depends(get_sync_source_service)]
 from app.services.rag_status import RAGStatusService
 
 
-def get_rag_status_service() -> RAGStatusService:
-    """Create RAGStatusService instance (no DB)."""
-    return RAGStatusService()
+def get_rag_status_service(redis: Redis) -> RAGStatusService:
+    """Create RAGStatusService backed by the shared lifespan Redis client."""
+    if redis.client is None:
+        raise RuntimeError("Redis client not connected")
+    return RAGStatusService(client=redis.client)
 
 
 RAGStatusSvc = Annotated[RAGStatusService, Depends(get_rag_status_service)]

@@ -25,4 +25,3 @@ export function formatSql(sql: string): string {
   out = out.replace(LITERAL_TOKEN_RE, (_, i) => literals[Number(i)] ?? "");
   return out.trim();
 }
-

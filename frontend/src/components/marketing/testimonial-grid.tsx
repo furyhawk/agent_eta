@@ -58,4 +58,3 @@ export function TestimonialGrid({ items }: TestimonialGridProps) {
     </div>
   );
 }
-

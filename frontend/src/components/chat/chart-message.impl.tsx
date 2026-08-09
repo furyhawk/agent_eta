@@ -388,4 +388,3 @@ function ChartMessageInner({ spec }: { spec: ChartSpec }) {
     </div>
   );
 }
-

@@ -107,4 +107,3 @@ function UsageTooltip({
     </div>
   );
 }
-

@@ -226,4 +226,3 @@ export function MarkdownContent({ content, onCiteClick }: MarkdownContentProps) 
     </ReactMarkdown>
   );
 }
-

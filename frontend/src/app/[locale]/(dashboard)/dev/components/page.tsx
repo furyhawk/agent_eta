@@ -133,4 +133,3 @@ function Gallery() {
     </div>
   );
 }
-

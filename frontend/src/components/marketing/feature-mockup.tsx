@@ -173,4 +173,3 @@ function BillingMockup({ className }: { className?: string }) {
     </MockFrame>
   );
 }
-

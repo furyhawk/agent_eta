@@ -193,7 +193,7 @@ db-history:
 
 # === Server ===
 run:
-	uv run --directory backend agent_eta server run --reload
+	uv run --directory backend agent_eta server run --reload --host 0.0.0.0 --port 8500
 
 run-prod:
 	uv run --directory backend agent_eta server run --host 0.0.0.0 --port 8000

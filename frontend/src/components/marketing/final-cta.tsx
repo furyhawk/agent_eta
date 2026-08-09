@@ -71,4 +71,3 @@ export function FinalCta({ stat, title, description, primary, secondary }: Final
     </div>
   );
 }
-

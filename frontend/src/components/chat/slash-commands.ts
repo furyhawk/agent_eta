@@ -143,4 +143,3 @@ export function searchCommands(commands: SlashCommand[], query: string): SlashCo
       c.description.toLowerCase().includes(q),
   );
 }
-

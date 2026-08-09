@@ -11,6 +11,7 @@ from langchain_text_splitters import MarkdownHeaderTextSplitter, RecursiveCharac
 
 from app.core.config import settings as app_settings
 from app.services.rag.config import DocumentExtensions, RAGSettings
+from app.services.rag.image_describer import OpenAIImageDescriber
 from app.services.rag.models import (
     Document,
     DocumentImage,
@@ -526,9 +527,12 @@ class DocumentProcessor:
 
     @staticmethod
     def _init_image_describer(settings: RAGSettings) -> Any:
-        """Initialize the image describer using the configured AI framework."""
-        model_name = (
-            getattr(app_settings, "RAG_IMAGE_DESCRIPTION_MODEL", None) or app_settings.AI_MODEL
+        """Initialize the LLM image describer using the configured AI framework."""
+        model_name = settings.image_description_model or app_settings.AI_MODEL
+        return OpenAIImageDescriber(
+            model=model_name,
+            api_key=app_settings.OPENROUTER_API_KEY,
+            base_url="https://openrouter.ai/api/v1",
         )
 
     async def _describe_images(self, document: Document) -> None:

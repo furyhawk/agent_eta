@@ -470,4 +470,3 @@ function ViewTab({
     </button>
   );
 }
-

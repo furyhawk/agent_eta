@@ -157,4 +157,3 @@ function formatDayLabel(day: string, _range: number): string {
   if (Number.isNaN(d.getTime())) return day;
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
-

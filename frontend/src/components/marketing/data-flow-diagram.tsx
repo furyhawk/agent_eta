@@ -346,4 +346,3 @@ function AnimatedCount({ target, suffix }: { target: number; suffix?: string }) 
     </p>
   );
 }
-

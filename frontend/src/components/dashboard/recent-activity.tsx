@@ -175,4 +175,3 @@ function ActivityRow({ item }: { item: ActivityItem }) {
 function humanizeTxType(t: string): string {
   return t.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase());
 }
-

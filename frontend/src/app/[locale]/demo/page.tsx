@@ -153,4 +153,3 @@ export default async function DemoGalleryPage({
     </div>
   );
 }
-

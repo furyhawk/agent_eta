@@ -20,4 +20,3 @@ export function JsonLd({ data }: JsonLdProps) {
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeStringify(data) }} />
   );
 }
-

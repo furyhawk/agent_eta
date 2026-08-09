@@ -84,4 +84,3 @@ export function ChatEmptyState({ onPick, agentLabel = "pydantic_ai" }: ChatEmpty
     </div>
   );
 }
-

@@ -68,4 +68,3 @@ export function CaseStudy({ quote, name, role, company, metrics }: CaseStudyProp
     </div>
   );
 }
-
